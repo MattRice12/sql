@@ -1,60 +1,126 @@
-SELECT SUM(salary) from family_members;
-SELECT COUNT(*) FROM friends_of_pickles WHERE species = 'dog';
-SELECT * FROM friends_of_pickles ORDER BY height_cm DESC LIMIT 1;
-SELECT DISTINCT species FROM friends_of_pickles WHERE height_cm > 50;
+##Explorer Mode - Matt Rice
 
-SELECT MAX(height_cm), species FROM friends_of_pickles GROUP BY species;
+#How many users are there?
+```
+SELECT COUNT(*) 
+FROM users;
+```
+50
+#______________________
+
+#What are the 5 most expensive items?
+
+```
+SELECT price 
+FROM items 
+ORDER BY price 
+DESC 
+LIMIT 5;
+```
+$9,984
+$9,859
+$9,790
+$9,390
+$9,341
+#______________________
+
+#What's the cheapest book? (Does that change for "category is exactly 'book'" versus "category contains 'book'"?)
+
+```
+SELECT MIN(price) 
+FROM items 
+WHERE category = 'Books';
+```
+$1,496
+
+#______________________
 
 
-##select family_member with the highest salary
-  SELECT * FROM family_members WHERE salary = (SELECT MAX(salary) FROM family_members);
+#Who lives at "6439 Zetta Hills, Willmouth, WY"? Do they have another address?
+```
+SELECT first_name, last_name 
+FROM users WHERE id = 
+(SELECT user_id 
+ FROM addresses 
+ WHERE street = '6439 Zetta Hills');
+```
+Corrine Little
 
-SELECT * FROM family_members WHERE favorite_book IS NOT NULL;
+```
+SELECT street, city, state 
+FROM addresses 
+WHERE user_id = 40;
+```
+Yes. 54369 Wolff Forges, Lake Byron, CA 31587
+#______________________
 
-SELECT * FROM celebs_born WHERE birthdate > '1980-09-01';
+#Correct Virginie Mitchell's address to "New York, NY, 10108".
+
+```
+UPDATE addresses 
+SET city = 'New York', zip = '10108' 
+WHERE state = 'NY' AND user_id = 
+(SELECT user_id 
+FROM addresses 
+WHERE state = 'NY' AND user_id = 
+(SELECT id 
+FROM users 
+WHERE first_name = 'Virginie'));
+```
+
+#______________________
+
+#How much would it cost to buy one of each tool?
+```
+SELECT SUM(price) 
+FROM items 
+WHERE category 
+IN ('Tools');
+```
+$7,383
+
+#______________________
+
+#How many total items did we sell?
+```
+SELECT SUM(quantity) 
+FROM orders;
+```
+2,125
 
 
-##Can you use an inner join to pair each character name with the actor who plays them? Select the columns: character.name, character_actor.actor_name
+#______________________
 
-  SELECT character.name, character_actor.actor_name FROM character
-  INNER JOIN character_actor
-  ON character.id = character_actor.character_id;
+#How much was spent on books?
+```
+SELECT sum(price) 
+FROM items 
+WHERE category 
+IN ('Books');
+```
+$22,702
 
+#______________________
 
-##Can you use two joins to pair each character name with the actor who plays them? Select the columns: character.name, actor.name
-  SELECT character.name, actor.name
-  FROM character
-  INNER JOIN character_actor
-  ON character.id = character_actor.character_id
-  INNER JOIN actor
-  ON character_actor.actor_id = actor.id;
+#Simulate buying an item by inserting a User for yourself and an Order for that User.
+```
+INSERT INTO users (id,first_name,last_name,email)
+VALUES (51,'Matt','Rice','mattrice12@outlook.com');
+```
+^Creates user
 
-##Can you use left joins to match character names with the actors that play them? Select the columns: character.name, actor.name
-  SELECT character.name, actor.name
-  FROM character
-  LEFT JOIN character_actor
-  ON character.id = character_actor.character_id
-  LEFT JOIN actor
-  ON character_actor.actor_id = actor.id;
+```
+INSERT INTO orders (user_id, item_id,quantity)
+VALUES (51, 55, 200);
+```
+^Creates order
 
-  SELECT c.name, a.name
-  FROM character AS c
-  LEFT JOIN character_actor AS ca
-  ON c.id = ca.character_id
-  LEFT JOIN actor AS a
-  ON ca.actor_id = a.id;
-
-##Can you run a query that returns the name of an employee and the name of their boss? Use column aliases to make the columns employee_name and boss_name.
-  SELECT e.name AS employee_name, b.name AS boss_name
-  FROM employees AS e
-  INNER JOIN employees as b
-  ON e.boss_id = b.id
-
-Can you return the results with a column named sound that returns "talk" for humans, "bark" for dogs, and "meow" for cats?
-  SELECT *, 
-  CASE WHEN species = 'human' THEN 'talk'
-  WHEN species = 'dog' THEN 'bark'
-  WHEN species = 'cat' THEN 'meow'
-  END
-  AS sound
-  FROM friends_of_pickles;
+```
+SELECT * 
+FROM orders 
+WHERE user_id = 
+(SELECT id 
+FROM users 
+WHERE email = 'mattrice12@outlook.com');
+```
+^Views order
