@@ -142,14 +142,7 @@ FROM orders));
 Ergonomic Cotton Shoes
 
 ```
-SELECT items.id, items.title, price, quantity 
-FROM items 
-INNER JOIN orders 
-ON items.id = orders.item_id 
-WHERE quantity = 
-(SELECT MAX(quantity) 
-FROM orders) 
-ORDER BY price DESC LIMIT 1;
+SELECT items.id, items.title, price, quantity FROM items INNER JOIN orders ON items.id = orders.item_id WHERE quantity = (SELECT MAX(quantity) FROM orders) ORDER BY price DESC LIMIT 1;
 ```
 Awesome Granite Pants
 #______________________
@@ -168,5 +161,5 @@ Roselyn Zboncak
 ##What were the top 3 highest grossing categories?
 
 
-
+SELECT items.category, price, quantity FROM items INNER JOIN orders ON items.id = orders.item_id ORDER BY category;
 
